@@ -1,6 +1,6 @@
 # vision
 
-❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧      Smart Study Planner      ☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙
+❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧      Smart Study Planner      ☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙☙
 
 ➢Information Gathered:
 
@@ -60,6 +60,6 @@ The target audience for the Smart Study Planner includes:
 • Study Groups: Groups of students collaborating on projects or exam preparation who can use the planner to coordinate their study sessions and ensure all topics are covered.
 
 
-❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧        THANK YOU       ❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧
+❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧        THANK YOU       ❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧❧
 
 
