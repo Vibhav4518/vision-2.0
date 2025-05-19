@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smart Study Planner</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  body {
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    background: linear-gradient(90deg, #4b6cb7, #182848);
+    width: 100%;
+    padding: 1rem 2rem;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.75rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+  main {
+    flex-grow: 1;
+    max-width: 900px;
+    width: 100%;
+    padding: 2rem;
+    background: white;
+    margin: 2rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(51, 102, 255, 0.15);
+  }
+  h2 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #334e68;
+  }
+  form {
+    margin-bottom: 2rem;
+  }
+  label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #334e68;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="number"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.4rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+  input[type="number"] {
+    max-width: 100px;
+  }
+  button {
+    margin-top: 1.5rem;
+    background-color: #476adc;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #354dc3;
+  }
+  .subjects-container {
+    margin-top: 1rem;
+  }
+  .subject-item {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    margin-top: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .subject-item > * {
+    flex: 1 1 150px;
+  }
+  .subject-item input[type="text"],
+  .subject-item input[type="date"] {
+    flex-grow: 1;
+  }
+  .remove-btn {
+    background: #e74c3c;
+    border: none;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    flex: 0 0 auto;
+    transition: background-color 0.3s ease;
+  }
+  .remove-btn:hover {
+    background: #c0392b;
+  }
+  #add-subject {
+    margin-top: 1rem;
+    background-color: #48bb78;
+  }
+  #add-subject:hover {
+    background-color: #3ca466;
+  }
+  #timetable {
+    margin-top: 2rem;
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 0.8rem 1rem;
+    text-align: center;
+    color: #334e68;
+  }
+  th {
+    background-color: #dbe7fd;
+    font-weight: 700;
+  }
+  .error-message {
+    color: #e53e3e;
+    margin-top: 0.8rem;
+    font-weight: 600;
+  }
+  @media (max-width: 600px) {
+    .subject-item {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+  }
+</style>
+</head>
+<body>
+<header>Smart Study Planner</header>
+<main>
+  <h2>Create Your Study Timetable</h2>
+  <form id="planner-form">
+    <label for="available-hours">Available hours per day:</label>
+    <input type="number" id="available-hours" name="available-hours" min="1" max="24" value="4" required />
+
+    <div class="subjects-container" id="subjects-container">
+      <label>Subjects & Exam Dates:</label>
+      <!-- Subject items will be added here dynamically -->
+    </div>
+
+    <button type="button" id="add-subject">+ Add Subject</button>
+    <div class="error-message" id="error-message"></div>
+    <button type="submit">Generate Timetable</button>
+  </form>
+
+  <section id="timetable-section" style="display:none;">
+    <h2>Your Personalized Timetable</h2>
+    <div id="timetable"></div>
+  </section>
+</main>
+
+<script>
+  const subjectsContainer = document.getElementById('subjects-container');
+  const addSubjectBtn = document.getElementById('add-subject');
+  const form = document.getElementById('planner-form');
+  const timetableSection = document.getElementById('timetable-section');
+  const timetableDiv = document.getElementById('timetable');
+  const errorMessage = document.getElementById('error-message');
+
+  // Add initial subject input row
+  function addSubjectItem(subject = '', examDate = '') {
+    const div = document.createElement('div');
+    div.className = 'subject-item';
+
+    const subjectInput = document.createElement('input');
+    subjectInput.type = 'text';
+    subjectInput.placeholder = 'Subject name';
+    subjectInput.required = true;
+    subjectInput.value = subject;
+    div.appendChild(subjectInput);
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.required = true;
+    dateInput.value = examDate;
+    div.appendChild(dateInput);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      div.remove();
+    });
+    div.appendChild(removeBtn);
+
+    subjectsContainer.appendChild(div);
+  }
+
+  addSubjectItem();
+
+  addSubjectBtn.addEventListener('click', () => {
+    addSubjectItem();
+  });
+
+  function validateInputs(subjects, hours) {
+    if (subjects.length === 0) {
+      return 'Please add at least one subject.';
+    }
+    for (const s of subjects) {
+      if (!s.name.trim()) {
+        return 'Subject names cannot be empty.';
+      }
+      if (!s.examDate) {
+        return 'All subjects must have exam dates.';
+      }
+    }
+    if (hours <= 0 || hours > 24) {
+      return 'Available hours per day must be between 1 and 24.';
+    }
+    return null;
+  }
+
+  // Generate date array between two dates inclusive
+  function getDateArray(start, end) {
+    const arr = [];
+    let dt = new Date(start);
+    while (dt <= end) {
+      arr.push(new Date(dt));
+      dt.setDate(dt.getDate() + 1);
+    }
+    return arr;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMessage.textContent = '';
+
+    const availableHours = parseInt(document.getElementById('available-hours').value, 10);
+
+    const subjectElems = document.querySelectorAll('.subject-item');
+    const subjects = [];
+    subjectElems.forEach(item => {
+      const inputs = item.querySelectorAll('input');
+      subjects.push({
+        name: inputs[0].value.trim(),
+        examDate: inputs[1].value,
+      });
+    });
+
+    // Validate inputs
+    const err = validateInputs(subjects, availableHours);
+    if (err) {
+      errorMessage.textContent = err;
+      timetableSection.style.display = 'none';
+      timetableDiv.innerHTML = '';
+      return;
+    }
+
+    // Prepare payload for backend
+    const payload = { subjects, availableHours };
+
+    try {
+      const response = await fetch('http://localhost:3000/generate-timetable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate timetable');
+      }
+
+      const timetable = await response.json();
+
+      renderTimetable(timetable);
+    } catch (error) {
+      errorMessage.textContent = 'Error generating timetable: ' + error.message;
+      timetableSection.style.display = 'none';
+      timetableDiv.innerHTML = '';
+    }
+  });
+
+  function formatDate(date) {
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // Render timetable table
+  function renderTimetable(timetable) {
+    timetableSection.style.display = 'block';
+    timetableDiv.innerHTML = '';
+
+    if (!timetable || timetable.length === 0) {
+      timetableDiv.textContent = 'No study sessions generated.';
+      return;
+    }
+
+    // timetable is an array of {date: string, schedules: [{subject, hours}]}
+    // We will create a table with Date in first column, then subjects as columns showing hours
+
+    // Get unique subjects
+    const subjectsSet = new Set();
+    timetable.forEach(day => {
+      day.schedules.forEach(s => subjectsSet.add(s.subject));
+    });
+    const subjects = Array.from(subjectsSet);
+
+    const table = document.createElement('table');
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+
+    const dateTh = document.createElement('th');
+    dateTh.textContent = 'Date';
+    headRow.appendChild(dateTh);
+
+    subjects.forEach(subj => {
+      const th = document.createElement('th');
+      th.textContent = subj;
+      headRow.appendChild(th);
+    });
+
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    timetable.forEach(day => {
+      const tr = document.createElement('tr');
+
+      const dateTd = document.createElement('td');
+      const dt = new Date(day.date);
+      dateTd.textContent = dt.toDateString();
+      tr.appendChild(dateTd);
+
+      subjects.forEach(subj => {
+        const sched = day.schedules.find(s => s.subject === subj);
+        const td = document.createElement('td');
+        td.textContent = sched ? sched.hours.toFixed(1) : '-';
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    timetableDiv.appendChild(table);
+  }
+</script>
+</body>
+</html>
+
